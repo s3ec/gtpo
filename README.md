@@ -1,3 +1,3 @@
 # gtpo
 
-nmap -iL ips.txt -p- -A -T4 --script "default,vuln,version,safe,discovery and not dos" --script-timeout 60s -oN full_scan.txt -oX full_scan.xml
+nmap -p 22,111,1002,2000,3001,5004,5060,5555,7007,8001,10243 -sV -sC --script=default,vuln,safe 192.168.1.10
