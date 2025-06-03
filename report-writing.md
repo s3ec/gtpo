@@ -162,3 +162,56 @@ The vulnerabilities identified during this internal penetration test pose signif
 ---
 
 This format should provide a clear and concise summary of the vulnerabilities, findings, impact, and remediation steps in the context of a penetration test report. Adjust the details (e.g., CVE references, client name) as necessary.
+
+
+Great, here's the updated **User Impersonation in Linux** report entry with your specific observation included:
+
+---
+
+### **User Impersonation in Linux**
+
+#### **Description**:
+
+User impersonation in Linux refers to the unauthorized ability of a user to execute commands or access resources as another user. This typically occurs due to misconfigured privileges, such as overly permissive `sudo` rules. In this case, an attacker was able to impersonate another user by running `/bin/su - <user>` via `sudo`, allowing full access to that user's environment and permissions.
+
+#### **Observation**:
+
+* **How We Found It**:
+  During the assessment, we identified that the current user had the ability to run `sudo /bin/su - <target_user>` without being prompted for a password. This allowed us to directly switch into the target user’s shell and operate with their privileges, effectively impersonating them without knowing their password.
+
+  ```bash
+  sudo /bin/su - <target_user>
+  ```
+
+  This misconfiguration in the `sudoers` file allowed unauthorized lateral movement between user accounts.
+
+#### **Impact**:
+
+* **User Account Takeover**: The attacker can gain access to another user’s shell, files, and running environment.
+* **Privilege Escalation**: If the impersonated user has elevated privileges (e.g., `sudo` access), this may allow the attacker to escalate to root.
+* **Data Breach**: The attacker may access sensitive files or credentials owned by the impersonated user.
+* **Audit Evasion**: Actions taken under the impersonated user may be attributed to them in logs, obscuring the real attacker.
+
+#### **Remediation**:
+
+1. **Review `sudoers` Configuration**:
+   Audit `/etc/sudoers` and any files under `/etc/sudoers.d/` for insecure rules allowing `sudo` access to `su`, particularly without a password (`NOPASSWD`). Remove or restrict such entries.
+
+   Example insecure rule:
+
+   ```
+   user ALL=(ALL) NOPASSWD: /bin/su -
+   ```
+
+2. **Enforce Least Privilege**:
+   Only grant `sudo` access to users who absolutely require it, and restrict allowed commands to a minimal set using command whitelisting in `sudoers`.
+
+3. **Monitor and Alert**:
+   Monitor logs (`/var/log/auth.log`, `sudo`, and `auditd`) for `sudo` and `su` usage. Alert on unexpected user switching.
+
+4. **Educate System Administrators**:
+   Ensure administrators understand the risks of allowing `sudo su` or `sudo /bin/su` in multi-user environments.
+
+---
+
+Let me know if you'd like a matching entry for privilege escalation to root or lateral movement using this method.
