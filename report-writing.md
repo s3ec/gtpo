@@ -28,9 +28,9 @@ During the internal adjacent network penetration test, multiple vulnerabilities 
 
 * **Vulnerability Type**: Remote Code Execution (RCE)
 
-* **Description**: The Zabbix Agent, running on several internal systems, was found to be misconfigured or outdated, making it vulnerable to RCE. This flaw allows an attacker to send specially crafted requests to execute arbitrary commands on affected systems.
+* **Description**:The Zabbix Agent is a monitoring tool that collects data from systems and sends it to the Zabbix server. A misconfiguration or an outdated version of the Zabbix Agent was found, allowing remote attackers to execute arbitrary commands on the target system. By sending a specially crafted request  attackers can run commands on the affected system, potentially gaining full control of the system.
 
-* **Finding**: During enumeration, we discovered that the Zabbix Agent was exposed and running an outdated version known to have an RCE vulnerability. By crafting specific API calls to the agent, we successfully triggered command execution.
+* **Finding**: During enumeration, we discovered that the Zabbix Agent was running  ,by crafting malicious commands via agent , we successfully triggered command execution.
 
 * **Impact**:
 
@@ -44,13 +44,13 @@ During the internal adjacent network penetration test, multiple vulnerabilities 
 
 * **Vulnerability Type**: Privilege Escalation / Impersonation
 
-* **Description**: Misconfigured SSH keys allowed unauthorized users to impersonate legitimate users and gain persistent access to internal systems. These misconfigurations were identified in SSH authorized keys files on key systems within the network.
+* **Description**:  Unauthorized SSH keys were added to a system via a reverse shell, allowing an attacker to impersonate legitimate users and gain persistent access to the system.
 
-* **Finding**: By exploiting expired or forgotten SSH keys, we were able to impersonate an existing user, which granted us unauthorized and persistent access to the system. This could allow an attacker to move laterally within the network or maintain access even after other security measures are put in place.
+* **Finding**: We successfully exploited the system to gain a reverse shell and added our own SSH key to the authorized_keys file of an administrative user. This provided us with persistent SSH access, bypassing traditional authentication mechanisms.
 
 * **Impact**:
 
-  * **Persistent Access**: Unauthorized users can retain access to systems without detection.
+  * **Persistent Access**: Attackers can maintain access to the compromised system even if passwords are changed.
   * **Privilege Escalation**: If the impersonated user has elevated privileges (e.g., sudo access), attackers can escalate to root and take full control of the system.
   * **Network Breach and Lateral Movement**: Attackers could pivot to other systems within the network.
 
