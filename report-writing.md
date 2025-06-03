@@ -37,6 +37,17 @@ During the internal adjacent network penetration test, multiple vulnerabilities 
   * **Arbitrary Code Execution**: Allows attackers to execute arbitrary commands remotely.
   * **Privilege Escalation**: Potential to escalate privileges if combined with other vulnerabilities.
   * **Data Exfiltration and Integrity Compromise**: Attackers could steal sensitive data, modify configurations, or deploy malicious software.
+  
+#### **Remediation**:
+
+1. **Update Zabbix Agent**: Upgrade the Zabbix Agent to the latest version to address any known vulnerabilities.
+2. **Disable Remote Command Execution**: Set `EnableRemoteCommands=0` in the Zabbix Agent configuration file (`zabbix_agentd.conf`) to prevent the execution of remote commands.
+3. **Restrict Access**: Limit access to the Zabbix Agent by allowing only trusted IP addresses (e.g., Zabbix Server) to communicate with the agent.
+4. **Use Strong Authentication**: Implement stronger authentication mechanisms such as token or certificate-based authentication for Zabbix Agent communication.
+5. **Audit Logs**: Enable detailed logging for the Zabbix Agent and regularly monitor for suspicious activities, such as failed authentication attempts or unexpected command executions.
+
+---
+  
 
 #### **2.2 SSH Permanent Access User Impersonation**
 
@@ -53,6 +64,20 @@ During the internal adjacent network penetration test, multiple vulnerabilities 
   * **Persistent Access**: Attackers can maintain access to the compromised system even if passwords are changed.
   * **Privilege Escalation**: If the impersonated user has elevated privileges (e.g., sudo access), attackers can escalate to root and take full control of the system.
   * **Network Breach and Lateral Movement**: Attackers could pivot to other systems within the network.
+
+
+#### **Remediation**:
+
+1. **Remove Unauthorized SSH Keys**:
+   Audit all `authorized_keys` files on the system and remove any unauthorized or suspicious SSH keys. Regenerate and rotate SSH keys for all users.
+2. **Implement SSH Key Management**:
+   Implement a proper key management system to securely store, distribute, and rotate SSH keys. Use strong passphrases for SSH keys.
+3. **Harden SSH Configuration**:
+   Modify the SSH configuration to prevent root login (`PermitRootLogin no`) and limit login access to specific users (`AllowUsers` or `AllowGroups`).
+4. **Monitor SSH Logs**:
+   Enable and regularly review SSH login logs (e.g., `/var/log/auth.log`) for signs of unauthorized access or the use of compromised SSH keys.
+5. **Use Multi-Factor Authentication (MFA)**:
+   Where possible, implement MFA for SSH access to add an extra layer of security, making it harder for attackers to gain unauthorized access.
 
 ---
 
