@@ -2,7 +2,7 @@ Absolutely! Here's the complete **finding** for the ADFS password spray issue, w
 
 ---
 
-### **Finding 1: Account Takeover via Password Spray on ADFS Authentication Portal **
+### Finding 1: Account Takeover via Password Spray on ADFS Authentication Portal 
 
 ---
 
