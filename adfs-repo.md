@@ -290,3 +290,128 @@ To mitigate this issue:
 * MITRE ATT\&CK – T1070.001: Indicator Removal on Host – Clear Cookies
 
 
+
+Here’s a full, professional write-up for the bug:
+
+---
+
+## 🔒 Vulnerability:
+
+**Sensitive Information Disclosure via IPv6 & WPAD Exposure Leading to NTLMv2 Hash Capture**
+
+---
+
+### 📝 **Description:**
+
+By default, Windows systems prefer IPv6 over IPv4. If **IPv6 is enabled but not actively configured or secured**, attackers on the same network segment can abuse this to perform **rogue router advertisement attacks**. Combined with **Windows Proxy Auto-Discovery (WPAD)** behavior, this allows attackers to **force victim systems to authenticate to a fake proxy server**, thereby capturing **NTLMv2 hashes**.
+
+This technique is commonly referred to as the **MITM6 attack**, and requires no user interaction. Captured NTLMv2 hashes can be **relayed (if signing not enforced)** or **cracked offline** to gain user credentials, leading to further compromise of internal systems.
+
+---
+
+### 🔍 **Observation:**
+
+During testing, it was observed that the ADFS server and other Windows systems in the environment had **IPv6 enabled by default**, but the protocol was not actively used or monitored. Additionally, **WPAD/Auto Proxy Detection** was enabled, and **NTLM authentication** was allowed internally.
+
+By simulating a rogue IPv6 router (RA) and DNS server, a malicious actor can:
+
+* Assign themselves as the default gateway
+* Respond to WPAD queries
+* Capture NTLM authentication attempts automatically
+
+No direct exploitation of ADFS was necessary; however, the presence of this misconfiguration in the same environment as ADFS increases the **overall attack surface** significantly.
+
+---
+
+### ⚠️ **Impact:**
+
+An attacker with internal network access (e.g., via VPN, rogue device, or foothold) can:
+
+* Capture **NTLMv2 authentication hashes**
+* Attempt **offline cracking** to retrieve plaintext passwords
+* Perform **NTLM relay attacks** to services like:
+
+  * LDAP (if signing/channel binding not enforced)
+  * SMB (if signing disabled)
+  * Web interfaces with NTLM auth
+* Potentially gain **unauthorized access**, escalate privileges, or move laterally
+
+If high-privileged users (e.g., Domain Admins) are targeted, this could result in **full domain compromise**.
+
+---
+
+### 🛠️ **Remediation:**
+
+#### ✅ 1. **Disable IPv6 if not in use**
+
+On servers/workstations that do not require IPv6:
+
+```reg
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters]
+"DisabledComponents"=dword:000000ff
+```
+
+> ⚠️ Requires reboot. Do **not** disable IPv6 if you use DirectAccess, Windows Hello for Business, or similar services.
+
+---
+
+#### ✅ 2. **Disable WPAD / Auto Proxy Discovery**
+
+Disable via **registry (per user)**:
+
+```cmd
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v AutoDetect /t REG_DWORD /d 0 /f
+```
+
+Or via **Group Policy**:
+
+```
+User Configuration > Administrative Templates > Windows Components > Internet Explorer > Internet Control Panel > Connections Page > 
+"Prevent changing proxy settings" → Enabled
+
+"Automatically detect settings" → Disabled
+```
+
+---
+
+#### ✅ 3. **Enforce NTLM relay protections**
+
+* **SMB Signing** (on servers):
+
+  ```powershell
+  Set-SmbServerConfiguration -RequireSecuritySignature $true -EnableSecuritySignature $true
+  ```
+
+* **LDAP Signing & Channel Binding** (on Domain Controllers):
+
+```reg
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NTDS\Parameters]
+"LDAPServerIntegrity"=dword:0000002
+```
+
+* Require **Extended Protection for Authentication (EPA)** on all NTLM endpoints.
+
+---
+
+#### ✅ 4. **Network Monitoring**
+
+Deploy detection and prevention mechanisms:
+
+* Block rogue DHCPv6/Router Advertisements at switch/firewall
+* Monitor for WPAD resolutions (DNS or LLMNR) to non-authorized devices
+* Use Microsoft Defender for Identity or endpoint EDR for relay/hash capture attempts
+
+---
+
+### 📚 **References:**
+
+* MITM6 Tool: [https://github.com/fox-it/mitm6](https://github.com/fox-it/mitm6)
+* Responder: [https://github.com/lgandx/Responder](https://github.com/lgandx/Responder)
+* Microsoft: [Mitigating NTLM Relay Attacks](https://learn.microsoft.com/en-us/archive/blogs/miriamxyra/mitigating-ntlm-relay-attacks-on-active-directory-certificates-services-ad-cs)
+* CWE-319: Cleartext Transmission of Sensitive Information
+* CWE-664: Improper Control of a Resource Through Its Lifetime
+* OWASP A05:2021 – Security Misconfiguration
+
+---
+
+
