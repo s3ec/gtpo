@@ -116,3 +116,98 @@ File storage and document access via OneDrive and SharePoint
 ---
 
 
+Perfect — here’s the updated, **generalized description** for the vulnerability (fitting under the standard category of **Sensitive Information Disclosure**), while keeping the detailed technical context — including the **token signing certificate leak** — for the **Observation** section.
+
+---
+
+### **Vulnerability Name:**
+
+**Sensitive Information Disclosure via ADFS Federation Metadata Endpoint**
+
+---
+
+### **Description:**
+
+Sensitive information disclosure occurs when a system unintentionally exposes internal configuration details, infrastructure metadata, or cryptographic materials to unauthorized users. These exposures do not typically grant direct access, but they significantly increase the effectiveness of targeted attacks, reconnaissance efforts, and phishing campaigns.
+
+In this case, a publicly accessible ADFS (Active Directory Federation Services) metadata endpoint was identified. While federation metadata is intended for trusted service integrations, exposing it without restriction may leak configuration details about the organization's identity infrastructure. This can include federation service names, token signing certificates, internal URLs, and SAML/WS-Fed endpoints — all of which can support attacker planning and further exploitation.
+
+---
+
+### **Observation:**
+
+During testing, the following ADFS federation metadata endpoint was found to be publicly accessible over the internet without authentication:
+
+```
+https://<redacted>/FederationMetadata/2007-06/FederationMetadata.xml
+```
+
+When accessed, the response returned the full federation metadata XML document, which included:
+
+* **Federation service display name and entity ID**
+* **Internal ADFS and WS-Federation endpoint URLs**
+* **SAML 2.0 endpoint definitions**
+* **Public token signing certificate** used for signing security tokens
+* **Token encryption certificate details**
+* **Relying party and service provider configurations**
+
+Notably, the **token signing certificate** was exposed. While this certificate does not include a private key and cannot be directly used to impersonate a user, it does enable an attacker to:
+
+* **Validate or parse legitimate tokens** issued by ADFS
+* **Craft realistic spoofed tokens in phishing payloads**
+* **Gather cryptographic configuration and algorithm details**
+* **Build trust relationships in custom SAML or WS-Fed exploitation scenarios**, especially if private keys are later obtained elsewhere
+
+Publicly exposing this data gives attackers detailed insight into the organization’s identity and federation infrastructure, and can assist in launching advanced targeted attacks.
+
+---
+
+### **Impact:**
+
+The exposed metadata allows attackers to:
+
+* **Map the ADFS authentication infrastructure and endpoint URLs**
+* **Obtain token signing certificate details**, aiding in advanced SAML or WS-Federation attacks
+* **Prepare spoofing, phishing, or token replay attacks**
+* **Simulate federated interactions or craft malicious metadata** for use against relying parties
+
+While no credentials or private keys were disclosed directly, this information **supports pre-exploitation reconnaissance and post-compromise abuse** of the federation architecture.
+
+---
+
+### **Remediation:**
+
+**Immediate Actions:**
+
+1. **Restrict access to the ADFS metadata endpoint:**
+
+   * Block external unauthenticated access via firewall, WAF, or reverse proxy
+   * Allow access only to trusted, known IP ranges (e.g., integration partners)
+
+2. **Monitor and alert:**
+
+   * Enable logging on the ADFS server for all access to `/FederationMetadata/` paths
+   * Set up alerts for suspicious or repeated requests
+
+3. **Review exposure:**
+
+   * Evaluate the necessity of public federation metadata exposure
+   * Remove or disable unused endpoints and relying party trusts
+
+4. **Certificate hygiene:**
+
+   * Regularly rotate token signing certificates
+   * Ensure private keys are securely stored and never exposed
+
+---
+
+### **References:**
+
+* Microsoft – ADFS Federation Metadata: `docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/manage-federation-metadata`
+* OWASP Top 10 – A06:2021: Vulnerable and Outdated Components (information exposure)
+* MITRE ATT\&CK – T1592.004: Gather Victim Host Information: Network Trust Dependencies
+
+---
+
+
+
