@@ -205,4 +205,88 @@ While no credentials or private keys were disclosed directly, this information *
 ---
 
 
+Absolutely — here's a complete, professionally structured vulnerability write-up for the **missing cookie expiration on the `MSISAuth` cookie** in an ADFS-authenticated environment.
+
+---
+
+###Finding3 :Improper Session Termination Due to Persistent `MSISAuth` Cookie
+
+---
+
+### **Description:**
+
+Session management vulnerabilities occur when an application fails to properly manage authentication tokens or session cookies throughout a user’s login lifecycle. One critical issue is the lack of proper expiration or invalidation of session cookies after logout, which can allow unauthorized re-use of those tokens.
+
+In ADFS environments, the `MSISAuth` cookie is used to track the user’s authenticated session. If this cookie is not properly expired or invalidated upon logout, an attacker who obtains it can reuse it to gain access without needing to reauthenticate, even after the legitimate user has logged out.
+
+This undermines the purpose of logout functionality and exposes the system to **session hijacking** or **persistent unauthorized access**.
+
+---
+
+### **Observation:**
+
+During testing, the ADFS login flow was analyzed, and the following behavior was observed:
+
+* After successful login, a session cookie named `MSISAuth` was issued.
+* Upon logging out from the ADFS session or federated application (e.g., Microsoft 365), the session appeared to terminate visually.
+* However, the original `MSISAuth` cookie remained valid and usable.
+* When the same cookie was reused in a separate browser session or after the logout event, access was **still granted**, bypassing the intended logout behavior.
+
+This indicates that the server **did not invalidate or expire** the session cookie properly upon logout. The cookie remained active until it naturally expired or the browser was closed, depending on the session settings.
+
+---
+
+### **Impact:**
+
+Improper session termination allows an attacker to:
+
+* Reuse a stolen or intercepted session cookie to regain access after a user logs out
+* Maintain access to authenticated resources indefinitely (until cookie expires)
+* Bypass MFA or login workflows if the session token is reused
+* Launch **session fixation** or **post-logout session hijacking** attacks
+
+This can lead to **unauthorized access** to sensitive systems, data, and user accounts — especially dangerous in federated environments where a single session grants access to multiple services.
+
+---
+
+### **Remediation:**
+
+To mitigate this issue:
+
+1. **Enforce session invalidation on logout**
+
+   * Ensure that the `MSISAuth` cookie is **explicitly cleared** or invalidated on the server side during logout events.
+   * Configure ADFS to **issue short-lived session cookies** with strict expiration policies.
+
+2. **Use non-persistent (session-based) cookies**
+
+   * Avoid persistent cookies unless absolutely necessary.
+   * Use `SessionState` configuration to tightly control the token lifetime:
+
+     ```powershell
+     Set-ADFSProperties -PersistentSsoEnabled $false
+     Set-ADFSProperties -SSOLifetime 15
+     ```
+
+3. **Enable sliding expiration carefully**
+
+   * If using sliding expiration, ensure it doesn’t allow infinite session reuse. Set reasonable inactivity timeout limits.
+
+4. **Enable logout propagation**
+
+   * For federated applications, ensure proper **Single Logout (SLO)** implementation to revoke sessions across systems.
+
+5. **Secure cookie settings**
+
+   * Mark cookies as `HttpOnly`, `Secure`, and consider using `SameSite=Strict` to reduce exposure.
+
+---
+
+### **References:**
+
+* Microsoft Docs – [AD FS Single Sign-On and Session Lifetime](https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/operations/ad-fs-single-sign-on-settings)
+* OWASP – [Session Management Cheat Sheet](https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html)
+* CWE-613: Insufficient Session Expiration
+* MITRE ATT\&CK – T1070.001: Indicator Removal on Host – Clear Cookies
+
 
