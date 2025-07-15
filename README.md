@@ -7,6 +7,33 @@
 
 
 TCL Scripting Abuse with File Write/Delete Capabilities
+Unquoted Service Path
+
+Weak Service Permissions
+
+Insecure Service Executables
+
+DLL Hijacking
+
+Writable Registry for Services
+
+Auto-run Services in HKLM
+
+Hijackable Scheduled Tasks
+
+AlwaysInstallElevated Exploit
+
+MSI Privilege Escalation
+
+Fodhelper UAC Bypass
+
+Event Viewer UAC Bypass
+
+sdclt.exe UAC Bypass
+
+Token Impersonation (SeImpersonatePrivilege)
+
+Juicy Potato / Rogue Potato / PrintSpoofer
 
 
 | **Category**                         | **Test Case**                                                        |
