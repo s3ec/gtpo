@@ -8,9 +8,9 @@
 
 **Description:**
 
-The ADFS login endpoint was found to be vulnerable to password spraying — a brute-force technique where a small number of commonly used passwords are tested across many accounts to evade lockout mechanisms. When ADFS lacks appropriate rate-limiting or account lockout protections, this becomes a viable method for credential-based attacks.
+The ADFS (Active Directory Federation Services) authentication portal was found to be vulnerable to password spraying attacks due to weak authentication hardening. Password spraying is a brute-force technique where attackers try a small number of common passwords across many usernames. Unlike traditional brute-force attacks, password spraying avoids account lockout by limiting the number of attempts per account, making it stealthier and more effective against externally exposed login interfaces.
 
-During testing, the ADFS sign-in portal was accessible externally. A password spray yielded a valid user credential, which was then successfully used to authenticate into federated services such as Microsoft 365 (Outlook, Teams, OneDrive, SharePoint). The ADFS environment did not provide sufficient detection or prevention mechanisms, allowing the attacker to remain undetected and gain full access to the user’s digital workspace.
+In this case, the ADFS portal allowed repeated authentication attempts without effective controls such as account lockout, CAPTCHA, rate limiting, or multi-factor authentication (MFA). This creates a viable path for attackers to systematically identify valid credentials and gain unauthorized access to user accounts.
 
 ---
 
