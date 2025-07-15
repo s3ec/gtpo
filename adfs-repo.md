@@ -205,11 +205,11 @@ While no credentials or private keys were disclosed directly, this information *
 ---
 
 
-Absolutely — here's a complete, professionally structured vulnerability write-up for the **missing cookie expiration on the `MSISAuth` cookie** in an ADFS-authenticated environment.
 
----
 
-###Finding3 :Improper Session Termination Due to Persistent `MSISAuth` Cookie
+
+
+### Finding 3: :Improper Session Termination Due to Persistent `MSISAuth` Cookie
 
 ---
 
