@@ -113,14 +113,11 @@ File storage and document access via OneDrive and SharePoint
 * OWASP Authentication Cheat Sheet
 * NIST SP 800-63B – Digital Identity Guidelines
 
----
 
 
-Perfect — here’s the updated, **generalized description** for the vulnerability (fitting under the standard category of **Sensitive Information Disclosure**), while keeping the detailed technical context — including the **token signing certificate leak** — for the **Observation** section.
 
----
 
-### **Vulnerability Name:**
+### Finding 2:
 
 **Sensitive Information Disclosure via ADFS Federation Metadata Endpoint**
 
