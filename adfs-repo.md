@@ -209,9 +209,9 @@ While no credentials or private keys were disclosed directly, this information *
 
 
 
-### Finding 3: :Improper Session Termination Due to Persistent `MSISAuth` Cookie
+### Finding 3: Improper Session Expiration: Reusable MSISAuth Cookie After Logout
 
----
+
 
 ### **Description:**
 
