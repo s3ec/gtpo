@@ -115,17 +115,4 @@ File storage and document access via OneDrive and SharePoint
 
 ---
 
-Let me know if you want this formatted into a Word document or added to a full pentest report template.
 
-* OWASP Authentication Cheat Sheet
-* NIST SP 800-63B – Digital Identity Guidelines
-
----
-
-Let me know if you want this formatted into a Word document or added to a full pentest report template.
-
-* NIST SP 800-63B – Digital Identity Guidelines
-
----
-
-Let me know if you want this formatted into a Word document or added to a full pentest report template.
