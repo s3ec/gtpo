@@ -117,9 +117,7 @@ File storage and document access via OneDrive and SharePoint
 
 
 
-### Finding 2:
-
-**Sensitive Information Disclosure via ADFS Federation Metadata Endpoint**
+### Finding 2: Sensitive Information Disclosure via ADFS Federation Metadata Endpoint
 
 ---
 
