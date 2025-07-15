@@ -15,17 +15,17 @@ During testing, the ADFS sign-in portal was accessible externally. A password sp
 ---
 
 **Observation:**
+During testing, it was observed that the ADFS login portal (/adfs/ls/IdpInitiatedSignOn.aspx) was publicly accessible and responding to authentication requests over the internet. The portal did not enforce account lockout or rate-limiting mechanisms, making it susceptible to password spraying attacks.
 
-* ADFS login page was exposed externally (`/adfs/ls/IdpInitiatedSignOn.aspx`).
-* No CAPTCHA, rate-limiting, or IP throttling was present.
-* A password spray attempt using common passwords succeeded in identifying a valid user credential.
-* Using the compromised account, access was confirmed to:
+A controlled password spray was conducted using a list of valid usernames and a small set of commonly used passwords. Following several iterations, valid credentials for a standard user account were successfully identified.Post-authentication, the compromised credentials provided full access to the user’s digital environment, including:
 
-  * **Microsoft Outlook Web Access**
-  * **Microsoft Teams**
-  * **SharePoint / OneDrive**
-* No alerts, lockouts, or anomaly detection were triggered during the attack.
-* The compromised user had unrestricted access to internal and cloud-based resources.
+Email access via Outlook Web Access (OWA)
+
+Real-time collaboration tools such as Microsoft Teams
+
+File storage and document access via OneDrive and SharePoint
+
+
 
 ---
 
