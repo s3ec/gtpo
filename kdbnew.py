@@ -1,14 +1,12 @@
 import pykx
 import pandas as pd
-import time
 
 def print_result(result):
     try:
         if isinstance(result, pykx.Table):
-            # Show table as pandas
-            df = result.pd()
+            # Tables as pandas DataFrame
             print("▶ Table result:")
-            print(df)
+            print(result.pd())
         elif isinstance(result, pykx.Dictionary):
             print("▶ Dictionary result:")
             d = result.py()
@@ -16,15 +14,19 @@ def print_result(result):
                 print(f"  {k}: {v}")
         elif isinstance(result, pykx.List):
             print("▶ List result:")
-            for i, item in enumerate(result.py()):
+            lst = result.py()
+            for i, item in enumerate(lst):
                 print(f"  [{i}] {item}")
-        elif isinstance(result, pykx.SymbolAtom) or isinstance(result, pykx.QStr):
-            print("▶ Symbol/String:", result.py())
+        elif isinstance(result, (pykx.SymbolAtom, pykx.BooleanAtom, pykx.IntAtom, pykx.FloatAtom)):
+            print(f"▶ Atom result: {result.py()}")
         else:
-            # Scalar or other types
-            print("▶ Result:", result.py())
+            try:
+                print("▶ Generic result:", result.py())
+            except Exception:
+                print("▶ Raw q result:")
+                print(result.inspect())
     except Exception as e:
-        print("⚠️ Could not parse result:", e)
+        print(f"⚠️ Error printing result: {e}")
         print("▶ Raw q format:")
         print(result.inspect())
 
@@ -36,7 +38,7 @@ def main():
         q = pykx.QConnection(host=ip, port=int(port))
         print(f"✅ Connected to kdb+ at {ip}:{port}\n")
     except Exception as e:
-        print(f"❌ Failed to connect: {e}")
+        print(f"❌ Connection failed: {e}")
         return
 
     while True:
