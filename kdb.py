@@ -1,28 +1,37 @@
-from qpython import qconnection
+import pykx
+import time
 
-# Define host and port
-host = '192.168.18.19'
-port = 6212
+def main():
+    ip = input("Enter IP (e.g. 127.0.0.1): ").strip()
+    port = input("Enter port (e.g. 5000): ").strip()
 
-# Create connection
-q = qconnection.QConnection(host=host, port=port)
+    try:
+        # Connect to kdb+ over IPC
+        q = pykx.QConnection(host=ip, port=int(port))
+        print(f"✅ Connected to kdb+ at {ip}:{port}\n")
+    except Exception as e:
+        print(f"❌ Failed to connect: {e}")
+        return
 
-try:
-    q.open()
-    if q.is_connected():
-        print(f"[+] Connected to KDB+ at {host}:{port}")
+    while True:
+        try:
+            cmd = input("q> ").strip()
+            if cmd in {"exit", "quit", "\\q"}:
+                print("Exiting.")
+                break
 
-        # Send arithmetic query
-        res1 = q.sendSync('2+2')
-        print("[+] 2+2 =", res1)
+            result = q(cmd)
 
-        # Send system command
-        res2 = q.sendSync('system "whoami"')
-        print("[+] whoami output:", res2)
-    else:
-        print("[-] Failed to connect")
+            # Try showing Python-friendly output
+            try:
+                py_result = result.py()
+                print("▶ Result (Python):", py_result)
+            except Exception:
+                print("▶ Result (Raw q):")
+                print(result.inspect())
 
-    q.close()
+        except Exception as e:
+            print(f"⚠️ Error running q command: {e}")
 
-except Exception as e:
-    print("[-] Error:", str(e))
+if __name__ == "__main__":
+    main()
