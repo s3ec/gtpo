@@ -1,3 +1,4 @@
+```
 using System;
 using System.Net.Sockets;
 using System.Text;
@@ -54,7 +55,7 @@ class Program
         return fullMessage;
     }
 }
-
+```
 
 | **S. No.** | **Test Case**                       |
 | ---------- | ----------------------------------- |
