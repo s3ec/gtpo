@@ -120,32 +120,38 @@ namespace KdbClient
         }
         
         static void DisplayResult(object result)
+{
+    try
+    {
+        if (result is c.Dict dict)
         {
-            try
-            {
-                if (result is c.Dict dict)
-                {
-                    DisplayDictionary(dict);
-                }
-                else if (result is c.Flip flip)
-                {
-                    DisplayTable(flip);
-                }
-                else if (result.GetType().IsArray)
-                {
-                    DisplayArray((Array)result);
-                }
-                else
-                {
-                    Console.WriteLine($"Result: {result} (Type: {result.GetType().Name})");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error displaying result: {ex.Message}");
-                Console.WriteLine($"Raw result: {result}");
-            }
+            DisplayDictionary(dict);
         }
+        else if (result is c.Flip flip)
+        {
+            DisplayTable(flip);
+        }
+        else if (result is char[] chars) // 🔁 New addition to handle char[]
+        {
+            string str = new string(chars);
+            Console.WriteLine($"\nSystem Output:\n{str}");
+        }
+        else if (result.GetType().IsArray)
+        {
+            DisplayArray((Array)result);
+        }
+        else
+        {
+            Console.WriteLine($"Result: {result} (Type: {result.GetType().Name})");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error displaying result: {ex.Message}");
+        Console.WriteLine($"Raw result: {result}");
+    }
+}
+
         
         static void DisplayTable(c.Flip table)
         {
