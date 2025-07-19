@@ -1,9 +1,11 @@
 ```
 using System;
-using System.Data;
-using kx;  // Kx namespace from kdb+.net
+using kx;                // Kx .NET API
+using Deedle;           // Deedle for DataFrame
+using System.Collections.Generic;
+using System.Linq;
 
-namespace QInteractiveTool
+namespace KdbDeedleTool
 {
     class Program
     {
@@ -24,28 +26,40 @@ Thanks for writing tools without payment
 ");
         }
 
+        static Frame<int, string> FlipToDeedleDataFrame(c.Flip flip)
+        {
+            var colNames = (string[])flip.x;
+            var colValues = (object[])flip.y;
+
+            int numRows = ((Array)colValues[0]).Length;
+            var dict = new Dictionary<string, SeriesBuilder<int>>();
+
+            for (int i = 0; i < colNames.Length; i++)
+            {
+                var builder = new SeriesBuilder<int>();
+                var columnData = (Array)colValues[i];
+
+                for (int row = 0; row < numRows; row++)
+                {
+                    builder.Add(row, columnData.GetValue(row));
+                }
+
+                dict[colNames[i]] = builder;
+            }
+
+            // Convert all builders to Series and build DataFrame
+            var seriesDict = dict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Series);
+            return Frame.FromColumns(seriesDict);
+        }
+
         static void PrintResult(object result)
         {
             if (result is c.Flip table)
             {
-                Console.WriteLine("▶ Table result:");
-                var cols = table.x; var data = table.y;
+                Console.WriteLine("▶ Deedle DataFrame Output:\n");
 
-                for (int i = 0; i < cols.Length; i++)
-                {
-                    Console.Write($"{cols[i]}\t");
-                }
-                Console.WriteLine();
-
-                int rowCount = ((Array)data[0]).Length;
-                for (int i = 0; i < rowCount; i++)
-                {
-                    for (int j = 0; j < cols.Length; j++)
-                    {
-                        Console.Write($"{((Array)data[j]).GetValue(i)}\t");
-                    }
-                    Console.WriteLine();
-                }
+                var df = FlipToDeedleDataFrame(table);
+                Console.WriteLine(df);
             }
             else if (result is Dictionary dict)
             {
@@ -63,7 +77,7 @@ Thanks for writing tools without payment
             }
             else
             {
-                Console.WriteLine($"▶ Atom result: {result}");
+                Console.WriteLine($"▶ Atom or other result: {result}");
             }
         }
 
@@ -80,12 +94,13 @@ Thanks for writing tools without payment
             c connection;
             try
             {
+                // Connect to kdb+
                 connection = new c(ip, port);
                 Console.WriteLine($"✅ Connected to kdb+ at {ip}:{port}\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Connection failed: {ex.Message}");
+                Console.WriteLine($"❌ Connection error: {ex.Message}");
                 return;
             }
 
@@ -107,12 +122,13 @@ Thanks for writing tools without payment
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"⚠️ Error running q command: {ex.Message}");
+                    Console.WriteLine($"⚠️ Query error: {ex.Message}");
                 }
             }
         }
     }
 }
+
 
 ```
 
