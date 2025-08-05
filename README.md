@@ -1,4 +1,12 @@
 ```
+employees: ([] name: `john`jane; age: 30 25; dept: `IT`HR)
+delete employees
+employees: ()
+
+```
+
+
+```
 using System;
 using kx;                // Kx .NET API
 using Deedle;           // Deedle for DataFrame
