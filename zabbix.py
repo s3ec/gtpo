@@ -1,28 +1,33 @@
 import socket
 import struct
 
-def zabbix_query(host, port, key):
-    # Zabbix protocol header
-    header = b'ZBXD\1'
-
-    # Request body is just the key (e.g., system.uptime)
-    data = key.encode()
-    length = struct.pack('<Q', len(data))  # 8-byte little-endian
-
-    packet = header + length + data
+def zabbix_agent_get(host, port, key):
+    header = b'ZBXD\x01'
+    payload = key.encode('utf-8')
+    length = struct.pack('<Q', len(payload))  # 8-byte little-endian
+    request = header + length + payload
 
     try:
-        with socket.create_connection((host, port), timeout=3) as sock:
-            sock.sendall(packet)
-            response = sock.recv(4096)
-            if response.startswith(b'ZBXD\1'):
-                length = struct.unpack('<Q', response[5:13])[0]
-                payload = response[13:13+length].decode()
-                print(f"✔️ Response for '{key}' from {host}:{port}:\n{payload}")
-            else:
-                print("❌ Invalid response from agent.")
+        with socket.create_connection((host, port), timeout=5) as sock:
+            sock.sendall(request)
+            # Receive header + length first
+            response_header = sock.recv(13)
+            if not response_header.startswith(b'ZBXD\x01'):
+                print("❌ Invalid protocol header received from agent.")
+                return
+            data_length = struct.unpack('<Q', response_header[5:13])[0]
+            # Receive full response payload
+            response_body = b''
+            while len(response_body) < data_length:
+                chunk = sock.recv(data_length - len(response_body))
+                if not chunk:
+                    break
+                response_body += chunk
+
+            print(f"✔️ Response for key '{key}':\n{response_body.decode('utf-8')}")
+
     except Exception as e:
-        print(f"❌ Connection failed: {e}")
+        print(f"❌ Error: {e}")
 
 # Example usage
-zabbix_query("192.168.1.100", 10050, "system.uptime")
+zabbix_agent_get("192.168.1.100", 10050, "system.uptime")
