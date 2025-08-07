@@ -1,4 +1,5 @@
-$tcp = New-Object Net.Sockets.TcpClient("192.168.1.100", 10050); $stream = $tcp.GetStream(); $data = [System.Text.Encoding]::ASCII.GetBytes("system.uptime"); $len = [BitConverter]::GetBytes([UInt64]$data.Length); $req = ([System.Text.Encoding]::ASCII.GetBytes("ZBXD`x01") + $len + $data); $stream.Write($req, 0, $req.Length); $buffer = New-Object byte[] 4096; $read = $stream.Read($buffer, 0, $buffer.Length); if ($read -ge 13) { [System.Text.Encoding]::ASCII.GetString($buffer, 13, $read - 13) } else { "❌ Invalid response: too short ($read bytes)" }; $stream.Close(); $tcp.Close()
+$host = "192.168.1.100"; $port = 10050; $key = "system.uptime"; $tcp = New-Object Net.Sockets.TcpClient($host, $port); $stream = $tcp.GetStream(); $keyBytes = [System.Text.Encoding]::ASCII.GetBytes($key); $len = [BitConverter]::GetBytes([UInt64]$keyBytes.Length); $packet = ([System.Text.Encoding]::ASCII.GetBytes("ZBXD`x01") + $len + $keyBytes); $stream.Write($packet, 0, $packet.Length); $buffer = New-Object byte[] 4096; $bytesRead = $stream.Read($buffer, 0, $buffer.Length); if ($bytesRead -ge 13) { [System.Text.Encoding]::ASCII.GetString($buffer, 13, $bytesRead - 13) } else { "❌ Invalid response (too short: $bytesRead bytes)" }; $stream.Close(); $tcp.Close()
+
 
 import socket
 import struct
