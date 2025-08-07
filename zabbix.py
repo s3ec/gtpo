@@ -1,3 +1,4 @@
+$tcp = New-Object Net.Sockets.TcpClient("192.168.1.100", 10050); $stream = $tcp.GetStream(); $data = [System.Text.Encoding]::ASCII.GetBytes("system.uptime"); $len = [BitConverter]::GetBytes([UInt64]$data.Length); $req = ([System.Text.Encoding]::ASCII.GetBytes("ZBXD`x01") + $len + $data); $stream.Write($req, 0, $req.Length); $buffer = New-Object byte[] 4096; $read = $stream.Read($buffer, 0, $buffer.Length); [System.Text.Encoding]::ASCII.GetString($buffer, 13, $read - 13); $stream.Close(); $tcp.Close()
 (echo -ne "ZBXD\x01\x0c\x00\x00\x00\x00\x00\x00\x00system.uptime"; cat) | nc 192.168.1.100 10050
 import socket
 import struct
