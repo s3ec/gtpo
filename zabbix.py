@@ -1,3 +1,4 @@
+(echo -ne "ZBXD\x01\x0c\x00\x00\x00\x00\x00\x00\x00system.uptime"; cat) | nc 192.168.1.100 10050
 import socket
 import struct
 
