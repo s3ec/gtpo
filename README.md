@@ -1,4 +1,27 @@
 ```
+import winrm
+
+# Replace with your target host
+target_host = "https://YOUR-SERVER:5986/wsman"
+
+# Create a WinRM session with no authentication and ignoring SSL cert
+session = winrm.Session(
+    target_host,
+    auth=('', ''),  # No authentication
+    transport='ssl',
+    server_cert_validation='ignore'
+)
+
+# Run a test command
+result = session.run_cmd('whoami')
+print("Status code:", result.status_code)
+print("STDOUT:", result.std_out.decode())
+print("STDERR:", result.std_err.decode())
+
+```
+
+
+```
 employees: ([] name: `john`jane; age: 30 25; dept: `IT`HR)
 delete employees
 employees: ()
