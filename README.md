@@ -1,29 +1,4 @@
-```
-import winrm
 
-# Target WinRM endpoint
-target_host = "https://YOUR-SERVER:5986/wsman"
-
-# Your credentials
-username = "Administrator"
-password = "YourPasswordHere"
-
-# Create a WinRM session (Basic auth, ignore cert)
-session = winrm.Session(
-    target_host,
-    auth=(username, password),
-    transport='ssl',
-    server_cert_validation='ignore'
-)
-
-# Run a test command
-result = session.run_cmd('whoami')
-print("Status code:", result.status_code)
-print("STDOUT:", result.std_out.decode())
-print("STDERR:", result.std_err.decode())
-
-
-```
 
 
 ```
