@@ -1,4 +1,21 @@
+```
+Add-Type -AssemblyName System.Messaging
 
+# Path to the existing remote queue
+$queuePath = "FormatName:DIRECT=OS:192.168.1.1\private$\myqueue"
+
+# Connect to the queue
+$q = New-Object System.Messaging.MessageQueue $queuePath
+
+# Optional: set formatter (needed if receiver uses a specific format)
+$q.Formatter = New-Object System.Messaging.XmlMessageFormatter @([string])
+
+# Send a text message
+$q.Send("Hello from PowerShell at $(hostname)")
+
+Write-Host "Message sent to $queuePath"
+
+```
 
 
 ```
