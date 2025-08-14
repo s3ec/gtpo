@@ -1,13 +1,17 @@
 ```
 import winrm
 
-# Replace with your target host
+# Target WinRM endpoint
 target_host = "https://YOUR-SERVER:5986/wsman"
 
-# Create a WinRM session with no authentication and ignoring SSL cert
+# Your credentials
+username = "Administrator"
+password = "YourPasswordHere"
+
+# Create a WinRM session (Basic auth, ignore cert)
 session = winrm.Session(
     target_host,
-    auth=('', ''),  # No authentication
+    auth=(username, password),
     transport='ssl',
     server_cert_validation='ignore'
 )
@@ -17,6 +21,7 @@ result = session.run_cmd('whoami')
 print("Status code:", result.status_code)
 print("STDOUT:", result.std_out.decode())
 print("STDERR:", result.std_err.decode())
+
 
 ```
 
