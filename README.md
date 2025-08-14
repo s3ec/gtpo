@@ -1,23 +1,14 @@
 ```
 Add-Type -AssemblyName System.Messaging
-
-# The queue path you want to read from
-$queuePath = ".\private$\myqueue"   # local example
-# For remote, use: "FormatName:DIRECT=OS:192.168.1.1\private$\myqueue"
-
-# Connect to queue
-$q = New-Object System.Messaging.MessageQueue $queuePath
+$q = New-Object System.Messaging.MessageQueue "FormatName:DIRECT=OS:192.168.1.1\private$\myqueue"
 $q.Formatter = New-Object System.Messaging.XmlMessageFormatter @([string])
 
-# Wait up to 30 seconds for a message
-Write-Host "Waiting for a message..."
-$msg = $q.Receive([TimeSpan]::FromSeconds(30))
-
+$msg = $q.Receive([TimeSpan]::FromSeconds(10))
 if ($msg) {
     $msg.Formatter = New-Object System.Messaging.XmlMessageFormatter @([string])
     Write-Host "Message received:" $msg.Body
 } else {
-    Write-Host "No message received in time."
+    Write-Host "No message or no permission to receive."
 }
 
 
