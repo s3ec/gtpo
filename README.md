@@ -1,14 +1,36 @@
 ```
 Add-Type -AssemblyName System.Messaging
-$q = New-Object System.Messaging.MessageQueue "FormatName:DIRECT=OS:192.168.1.1\private$\myqueue"
-$q.Formatter = New-Object System.Messaging.XmlMessageFormatter @([string])
 
-$msg = $q.Receive([TimeSpan]::FromSeconds(10))
-if ($msg) {
-    $msg.Formatter = New-Object System.Messaging.XmlMessageFormatter @([string])
-    Write-Host "Message received:" $msg.Body
-} else {
-    Write-Host "No message or no permission to receive."
+$ip = "192.168.19.89"
+
+# Wordlist of possible queues
+$queueNames = @(
+    "flag",
+    "admin",
+    "secrets",
+    "date",
+    "task",
+    "job",
+    "update",
+    "internal",
+    "debug",
+    "private",
+    "user",
+    "root",
+    "test"
+)
+
+foreach ($name in $queueNames) {
+    $path = "FormatName:DIRECT=TCP:$ip\Private$\$name"
+    try {
+        $q = New-Object System.Messaging.MessageQueue $path
+        # Attempt a peek to see if queue is accessible
+        $q.Peek([TimeSpan]::FromSeconds(1)) | Out-Null
+        Write-Output "Accessible queue: $path"
+    }
+    catch {
+        Write-Output "Not accessible: $path"
+    }
 }
 
 
