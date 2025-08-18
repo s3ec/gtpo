@@ -1,6 +1,17 @@
 ```
 Add-Type -AssemblyName System.Messaging
 
+$server = "192.168.19.89"   # or hostname
+
+[System.Messaging.MessageQueue]::GetPublicQueuesByMachine($server) | ForEach-Object {
+    Write-Output $_.QueueName
+}
+
+```
+
+```
+Add-Type -AssemblyName System.Messaging
+
 $ip = "192.168.19.89"
 
 # Wordlist of possible queues
