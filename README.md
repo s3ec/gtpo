@@ -4,7 +4,7 @@ Got it — you want a **report-style write-up** for an SNMP (Simple Network Mana
 
 ---
 
-### **Vulnerability: SNMP Read/Write Access Enabled**
+### **SNMP Service with Read/Write Community Access**
 
 **Description**
 SNMP (Simple Network Management Protocol) is used for monitoring and managing network devices. When SNMP is configured with read-write (RW) access, it allows not only viewing but also modifying system configurations remotely. If this access is available using default or weak community strings, attackers can exploit it to change configurations, disrupt services, or gain further access into the environment.
