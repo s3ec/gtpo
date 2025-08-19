@@ -1,5 +1,52 @@
+Got it 👍 — here’s a **polished, professional, report-ready vulnerability entry** for **SSH Private Key – Sensitive Information Disclosure** that matches the style of your other findings (SNMP, NTP, Type 7, etc.):
 
-Perfect 👍 — since you actually **decrypted the Cisco Type 7 password**, the vulnerability finding should reflect that the weakness is not just theoretical but demonstrable. Here’s a professional report-ready write-up:
+---
+
+## 🔐 Vulnerability: SSH Private Key – Sensitive Information Disclosure
+
+### **Description**
+
+SSH private keys are cryptographic credentials that uniquely identify and authenticate users or systems. If a private key is exposed, an attacker can impersonate the legitimate user, establish trusted SSH sessions, and move laterally across the network. Unlike passwords, private keys are often reused across multiple systems and rarely rotated, which significantly increases the security risk if compromised.
+
+### **Observation**
+
+During the assessment, SSH private key material was discovered in an accessible location. The exposed key was successfully decrypted and validated, confirming that it could be used to authenticate against target systems where the corresponding public key is trusted.
+
+Example (redacted):
+
+```
+-----BEGIN OPENSSH PRIVATE KEY-----
+[...redacted...]
+-----END OPENSSH PRIVATE KEY-----
+```
+
+### **Impact**
+
+* **Unauthorized Access:** Attackers can gain access to systems and services wherever the key is trusted.
+* **Lateral Movement:** Reused keys may provide access to multiple hosts, including privileged accounts.
+* **Data Compromise:** An attacker could exfiltrate data, deploy persistence, or execute arbitrary commands.
+* **Loss of Non-Repudiation:** Malicious activity may appear to originate from the legitimate key owner.
+
+### **Remediation**
+
+* Immediately **revoke the exposed key** from all affected systems (remove from `authorized_keys`).
+* Generate **new SSH key pairs**, ensuring they are **passphrase-protected** and stored securely.
+* Enforce use of modern algorithms (e.g., **ed25519** or **ECDSA**) and disable weak/legacy keys.
+* Centralize key management using an SSH certificate authority, bastion host, or privileged access management solution.
+* Regularly audit for exposed secrets in repositories, backups, ticketing systems, and logs.
+* Apply the principle of least privilege by restricting SSH access by user, host, and source IP where possible.
+
+### **References**
+
+* [OpenSSH – Authentication Keys](https://man.openbsd.org/ssh-keygen)
+* [CIS Benchmark – SSH Security Guidelines](https://www.cisecurity.org/benchmark)
+* [NIST SP 800-57 – Key Management Guidelines](https://csrc.nist.gov/publications/sp800-57)
+* [OWASP – Secrets Management](https://owasp.org/www-community/vulnerabilities/Exposed_Secrets)
+
+---
+
+
+
 
 ---
 
