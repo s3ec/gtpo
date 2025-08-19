@@ -1,6 +1,51 @@
 
+Perfect 👍 — since you actually **decrypted the Cisco Type 7 password**, the vulnerability finding should reflect that the weakness is not just theoretical but demonstrable. Here’s a professional report-ready write-up:
 
-Got it — you want a **report-style write-up** for an SNMP (Simple Network Management Protocol) read/write access vulnerability, with **Description, Observation, Impact, Remediation, and References**. Here’s a structured version you can directly use in your report:
+---
+
+## 🔐 Vulnerability: Insecure Cisco Type 7 Password Encryption
+
+### **Description**
+
+Cisco devices allow storing passwords using different encryption types. **Type 7** is a weak, reversible encoding scheme (Vigenère cipher) and **not a secure encryption method**. Passwords stored in this format can be trivially decrypted with widely available tools, exposing credentials in cleartext.
+
+### **Observation**
+
+During the assessment, it was observed that the Cisco device stores credentials using **Type 7 password encryption**. The password was successfully decrypted, confirming that the stored credentials can be easily recovered by anyone with access to the configuration file.
+
+Example:
+
+```
+username admin password 7 <encrypted-string>
+Decrypted password: <plaintext-password>
+```
+
+### **Impact**
+
+* Credentials stored on the device are **exposed in cleartext** once configuration files are accessed.
+* Attackers can use these credentials to gain **unauthorized administrative access** to the device.
+* Compromised accounts can be leveraged to alter configurations, disrupt services, or pivot further into the network.
+* Weak encryption fails to meet industry compliance and security best practices.
+
+### **Remediation**
+
+* Avoid using **Type 7 password storage** entirely.
+* Migrate to stronger hashing mechanisms supported in modern Cisco IOS versions:
+
+  * **Type 5 (MD5)** – legacy, better than Type 7 but no longer recommended.
+  * **Type 8 (PBKDF2)** or **Type 9 (scrypt)** – modern and secure options.
+* Use **AAA (TACACS+ or RADIUS)** for centralized authentication instead of local device credentials.
+* Restrict access to configuration files and backups to prevent credential exposure.
+* Rotate and replace any credentials that were stored using Type 7.
+
+### **References**
+
+* Cisco – [Password Encryption Types](https://www.cisco.com/c/en/us/support/docs/security-vpn/remote-authentication-dial-user-service-radius/11629-crypt-password.html)
+* OWASP – [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+* NIST SP 800-63B – Digital Identity Guidelines
+
+---
+
 
 ---
 
