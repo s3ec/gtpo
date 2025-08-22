@@ -1,3 +1,220 @@
+Got it 👍 — here’s a **polished, professional, report-ready vulnerability entry** for **SSH Private Key – Sensitive Information Disclosure** that matches the style of your other findings (SNMP, NTP, Type 7, etc.):
+
+---
+
+## 🔐 Vulnerability: SSH Private Key – Sensitive Information Disclosure
+
+### **Description**
+
+SSH private keys are cryptographic credentials that uniquely identify and authenticate users or systems. If a private key is exposed, an attacker can impersonate the legitimate user, establish trusted SSH sessions, and move laterally across the network. Unlike passwords, private keys are often reused across multiple systems and rarely rotated, which significantly increases the security risk if compromised.
+
+### **Observation**
+
+During the assessment, SSH private key material was discovered in an accessible location. The exposed key was successfully decrypted and validated, confirming that it could be used to authenticate against target systems where the corresponding public key is trusted.
+
+Example (redacted):
+
+```
+-----BEGIN OPENSSH PRIVATE KEY-----
+[...redacted...]
+-----END OPENSSH PRIVATE KEY-----
+```
+
+### **Impact**
+
+* **Unauthorized Access:** Attackers can gain access to systems and services wherever the key is trusted.
+* **Lateral Movement:** Reused keys may provide access to multiple hosts, including privileged accounts.
+* **Data Compromise:** An attacker could exfiltrate data, deploy persistence, or execute arbitrary commands.
+* **Loss of Non-Repudiation:** Malicious activity may appear to originate from the legitimate key owner.
+
+### **Remediation**
+
+* Immediately **revoke the exposed key** from all affected systems (remove from `authorized_keys`).
+* Generate **new SSH key pairs**, ensuring they are **passphrase-protected** and stored securely.
+* Enforce use of modern algorithms (e.g., **ed25519** or **ECDSA**) and disable weak/legacy keys.
+* Centralize key management using an SSH certificate authority, bastion host, or privileged access management solution.
+* Regularly audit for exposed secrets in repositories, backups, ticketing systems, and logs.
+* Apply the principle of least privilege by restricting SSH access by user, host, and source IP where possible.
+
+### **References**
+
+* [OpenSSH – Authentication Keys](https://man.openbsd.org/ssh-keygen)
+* [CIS Benchmark – SSH Security Guidelines](https://www.cisecurity.org/benchmark)
+* [NIST SP 800-57 – Key Management Guidelines](https://csrc.nist.gov/publications/sp800-57)
+* [OWASP – Secrets Management](https://owasp.org/www-community/vulnerabilities/Exposed_Secrets)
+
+---
+
+
+
+
+---
+
+## 🔐 Vulnerability: Insecure Cisco Type 7 Password Encryption
+
+### **Description**
+
+Cisco devices allow storing passwords using different encryption types. **Type 7** is a weak, reversible encoding scheme (Vigenère cipher) and **not a secure encryption method**. Passwords stored in this format can be trivially decrypted with widely available tools, exposing credentials in cleartext.
+
+### **Observation**
+
+During the assessment, it was observed that the Cisco device stores credentials using **Type 7 password encryption**. The password was successfully decrypted, confirming that the stored credentials can be easily recovered by anyone with access to the configuration file.
+
+Example:
+
+```
+username admin password 7 <encrypted-string>
+Decrypted password: <plaintext-password>
+```
+
+### **Impact**
+
+* Credentials stored on the device are **exposed in cleartext** once configuration files are accessed.
+* Attackers can use these credentials to gain **unauthorized administrative access** to the device.
+* Compromised accounts can be leveraged to alter configurations, disrupt services, or pivot further into the network.
+* Weak encryption fails to meet industry compliance and security best practices.
+
+### **Remediation**
+
+* Avoid using **Type 7 password storage** entirely.
+* Migrate to stronger hashing mechanisms supported in modern Cisco IOS versions:
+
+  * **Type 5 (MD5)** – legacy, better than Type 7 but no longer recommended.
+  * **Type 8 (PBKDF2)** or **Type 9 (scrypt)** – modern and secure options.
+* Use **AAA (TACACS+ or RADIUS)** for centralized authentication instead of local device credentials.
+* Restrict access to configuration files and backups to prevent credential exposure.
+* Rotate and replace any credentials that were stored using Type 7.
+
+### **References**
+
+* Cisco – [Password Encryption Types](https://www.cisco.com/c/en/us/support/docs/security-vpn/remote-authentication-dial-user-service-radius/11629-crypt-password.html)
+* OWASP – [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+* NIST SP 800-63B – Digital Identity Guidelines
+
+---
+
+
+---
+
+### **SNMP Service with Read/Write Community Access**
+
+**Description**
+SNMP (Simple Network Management Protocol) is used for monitoring and managing network devices. When SNMP is configured with read-write (RW) access, it allows not only viewing but also modifying system configurations remotely. If this access is available using default or weak community strings, attackers can exploit it to change configurations, disrupt services, or gain further access into the environment.
+
+**Observation**
+It was observed that the affected system(s) have SNMP service enabled with read-write access. This potentially allows unauthorized users to modify system parameters, routing configurations, or even disable interfaces if they can guess or obtain the community string.
+
+**Impact**
+
+* Unauthorized changes to network devices (routing, firewall rules, configurations).
+* Potential denial of service (DoS) by shutting down interfaces or altering critical configurations.
+* Increased attack surface for lateral movement within the network.
+* Complete compromise of device integrity and availability.
+
+**Remediation**
+
+* Disable SNMP read-write access wherever it is not strictly required.
+* If SNMP must be used, configure it with **read-only access**.
+* Replace default or weak community strings with strong, unique values.
+* Restrict SNMP access to trusted management hosts using ACLs/firewall rules.
+* Prefer secure versions such as **SNMPv3** with authentication and encryption over SNMPv1/v2c.
+* Regularly review SNMP configurations and monitor logs for unauthorized queries.
+
+**References**
+
+* [NIST – SNMP Security Recommendations](https://csrc.nist.gov/publications/detail/sp/800-153/final)
+* [CISA SNMP Security Best Practices](https://www.cisa.gov/resources-tools/resources/securing-simple-network-management-protocol-snmp)
+* [OWASP – SNMP Security](https://owasp.org/www-community/vulnerabilities/Simple_Network_Management_Protocol)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+Add-Type -AssemblyName System.Messaging
+
+$server = "192.168.19.89"   # or hostname
+
+[System.Messaging.MessageQueue]::GetPublicQueuesByMachine($server) | ForEach-Object {
+    Write-Output $_.QueueName
+}
+
+```
+
+```
+Add-Type -AssemblyName System.Messaging
+
+$ip = "192.168.19.89"
+
+# Wordlist of possible queues
+$queueNames = @(
+    "flag",
+    "admin",
+    "secrets",
+    "date",
+    "task",
+    "job",
+    "update",
+    "internal",
+    "debug",
+    "private",
+    "user",
+    "root",
+    "test"
+)
+
+foreach ($name in $queueNames) {
+    $path = "FormatName:DIRECT=TCP:$ip\Private$\$name"
+    try {
+        $q = New-Object System.Messaging.MessageQueue $path
+        # Attempt a peek to see if queue is accessible
+        $q.Peek([TimeSpan]::FromSeconds(1)) | Out-Null
+        Write-Output "Accessible queue: $path"
+    }
+    catch {
+        Write-Output "Not accessible: $path"
+    }
+}
+
+
+```
+
+
+```
+Add-Type -AssemblyName System.Messaging
+
+# Path to the existing remote queue
+$queuePath = "FormatName:DIRECT=OS:192.168.1.1\private$\myqueue"
+
+# Connect to the queue
+$q = New-Object System.Messaging.MessageQueue $queuePath
+
+# Optional: set formatter (needed if receiver uses a specific format)
+$q.Formatter = New-Object System.Messaging.XmlMessageFormatter @([string])
+
+# Send a text message
+$q.Send("Hello from PowerShell at $(hostname)")
+
+Write-Host "Message sent to $queuePath"
+
+```
+
+
 ```
 employees: ([] name: `john`jane; age: 30 25; dept: `IT`HR)
 delete employees
