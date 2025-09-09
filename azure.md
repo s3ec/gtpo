@@ -2,7 +2,7 @@ Perfect — let’s refine the remediation to highlight the **really good key ha
 
 ---
 
-### **Vulnerability: LLMNR/NBT-NS/IPv6 Name Resolution Poisoning**
+### **Vulnerability: Hash Capture via LLMNR/NBT-NS/WPAD Spoofing**
 
 **Description**
 Link-Local Multicast Name Resolution (LLMNR) and NetBIOS Name Service (NBT-NS) are legacy name resolution protocols that allow hosts to resolve names when DNS queries fail. When enabled, an attacker on the same network can spoof responses to these queries and trick a victim machine into authenticating to the attacker’s system. This often results in the capture of NTLMv2 password hashes, which can be brute-forced offline to reveal valid user credentials. The risk is compounded in IPv6 environments, where similar behavior may occur with multicast name resolution.
