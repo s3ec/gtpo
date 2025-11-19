@@ -14,40 +14,38 @@ var ipconfigExec = shell.Exec("ipconfig");
 var ipconfigOutput = ipconfigExec.StdOut.ReadAll();
 WScript.Echo("=== ipconfig ===\n" + ipconfigOutput);
 
-// Create WScript Shell object
-var shell = WScript.CreateObject("WScript.Shell");
 
-// -------------------------
-// 1. Run systeminfo
-// -------------------------
+
+// -----------------------------
+// 1. Run systeminfo safely
+// -----------------------------
 var sysRoot = shell.ExpandEnvironmentStrings("%SystemRoot%");
 var sysinfoExec;
 
-// Use SysNative to avoid 32/64‑bit redirection issues
-var sysinfoPath = sysRoot + "\\SysNative\\systeminfo.exe";
-
-// Try SysNative first
 try {
-    sysinfoExec = shell.Exec(sysinfoPath);
+    sysinfoExec = shell.Exec(sysRoot + "\\SysNative\\systeminfo.exe");
 } catch(e) {
-    // If SysNative doesn’t exist, fall back to System32
     sysinfoExec = shell.Exec(sysRoot + "\\System32\\systeminfo.exe");
 }
 
-var sysinfoOutput = sysinfoExec.StdOut.ReadAll();
-
-// Show output
-WScript.Echo("=== SYSTEMINFO OUTPUT ===\n\n" + sysinfoOutput);
+var output = sysinfoExec.StdOut.ReadAll();
+WScript.Echo("=== SYSTEMINFO ===\n\n" + output);
 
 
+// -----------------------------
+// 2. Run EXE in same folder
+// -----------------------------
 
-// -------------------------
-// 2. Run your EXE file
-// -------------------------
+// Get current script folder
+var fso = new ActiveXObject("Scripting.FileSystemObject");
+var scriptFullPath = WScript.ScriptFullName;
+var scriptFolder = fso.GetParentFolderName(scriptFullPath);
 
-// Full path to your application
-var appPath = "C:\\Users\\gan\\Downloads\\winner.exe";
+// Your EXE filename (same folder)
+var exeName = "winner.exe";   // <-- just the name, no path
 
-// Run it (1 = normal window, false = don't wait)
-shell.Run('"' + appPath + '"', 1, false);
+// Build full path safely
+var exeFullPath = scriptFolder + "\\" + exeName;
 
+// Run it (normal window, don’t wait)
+shell.Run('"' + exeFullPath + '"', 1, false);
