@@ -1,51 +1,45 @@
-// Create WScript Shell object
 var shell = WScript.CreateObject("WScript.Shell");
 
-// 1. Open Notepad
-shell.Run("notepad.exe", 1, false); // 1 = normal window, false = don't wait
-
-// 2. Run whoami and show output
-var whoamiExec = shell.Exec("whoami");
-var whoamiOutput = whoamiExec.StdOut.ReadAll();
-WScript.Echo("=== whoami ===\n" + whoamiOutput);
-
-// 3. Run ipconfig and show output
-var ipconfigExec = shell.Exec("ipconfig");
-var ipconfigOutput = ipconfigExec.StdOut.ReadAll();
-WScript.Echo("=== ipconfig ===\n" + ipconfigOutput);
-
-
-
-// -----------------------------
-// 1. Run systeminfo safely
-// -----------------------------
-var sysRoot = shell.ExpandEnvironmentStrings("%SystemRoot%");
-var sysinfoExec;
-
-try {
-    sysinfoExec = shell.Exec(sysRoot + "\\SysNative\\systeminfo.exe");
-} catch(e) {
-    sysinfoExec = shell.Exec(sysRoot + "\\System32\\systeminfo.exe");
+// Run a command and return entire output
+function run(cmd) {
+    try {
+        var exec = shell.Exec(cmd);
+        return exec.StdOut.ReadAll();
+    } catch(e) {
+        return "[Error running: " + cmd + "]";
+    }
 }
 
-var output = sysinfoExec.StdOut.ReadAll();
-WScript.Echo("=== SYSTEMINFO ===\n\n" + output);
+var output = "";
 
+// OS info
+output += "=== SYSTEMINFO ===\n";
+output += run("systeminfo");
+output += "\n";
 
-// -----------------------------
-// 2. Run EXE in same folder
-// -----------------------------
+// CPU info
+output += "=== CPU INFORMATION ===\n";
+output += run("wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors /format:list");
+output += "\n";
 
-// Get current script folder
-var fso = new ActiveXObject("Scripting.FileSystemObject");
-var scriptFullPath = WScript.ScriptFullName;
-var scriptFolder = fso.GetParentFolderName(scriptFullPath);
+// OS version (WMIC)
+output += "=== OS VERSION (WMIC) ===\n";
+output += run("wmic os get Caption,Version,BuildNumber /format:list");
+output += "\n";
 
-// Your EXE filename (same folder)
-var exeName = "winner.exe";   // <-- just the name, no path
+// Memory info
+output += "=== MEMORY INFORMATION ===\n";
+output += run("wmic computersystem get TotalPhysicalMemory /format:list");
+output += "\n";
 
-// Build full path safely
-var exeFullPath = scriptFolder + "\\" + exeName;
+// Disk info
+output += "=== DISK INFORMATION ===\n";
+output += run("wmic logicaldisk get Name,Size,FreeSpace /format:list");
+output += "\n";
 
-// Run it (normal window, don’t wait)
-shell.Run('"' + exeFullPath + '"', 1, false);
+// Current user
+output += "=== CURRENT USER ===\n";
+output += run("whoami");
+output += "\n";
+
+WScript.Echo(output);
