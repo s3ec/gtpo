@@ -1,11 +1,19 @@
-# giop_probe.py
 import socket
 import sys
 
 TARGET = "192.168.1.1"
-PORT = 2089  # ← CHANGE THIS
 
-# Common CORBA object keys to try
+# Read port dynamically
+if len(sys.argv) < 2:
+    print("Usage: python giop_probe.py <PORT>")
+    sys.exit(1)
+
+try:
+    PORT = int(sys.argv[1])
+except ValueError:
+    print("Port must be an integer.")
+    sys.exit(1)
+
 OBJECT_KEYS = [
     b"NameService",
     b"RootPOA",
@@ -17,11 +25,10 @@ OBJECT_KEYS = [
     b"Service",
     b"Server",
     b"Default",
-    b"",  # empty key (sometimes used)
+    b"",  # empty key
 ]
 
 def send_locate_request(key):
-    # GIOP 1.0 LocateRequest
     req_id = 0x12345678
     key_len = len(key)
     header = b"GIOP\x01\x00\x00\x05" + (8 + key_len).to_bytes(4, 'big')
@@ -32,10 +39,15 @@ def parse_locate_reply(data):
     if len(data) < 20:
         return "TOO SHORT"
     msg_type = data[7]
-    if msg_type != 0x06:  # LocateReply
+    if msg_type != 0x06:
         return f"NOT_LOCATE_REPLY ({hex(msg_type)})"
     status = data[-1]
-    statuses = {0: "OBJECT_HERE", 1: "OBJECT_FORWARD", 2: "UNKNOWN_OBJECT", 3: "LOC_SYSTEM_EXCEPTION"}
+    statuses = {
+        0: "OBJECT_HERE",
+        1: "OBJECT_FORWARD",
+        2: "UNKNOWN_OBJECT",
+        3: "LOC_SYSTEM_EXCEPTION"
+    }
     return statuses.get(status, f"UNKNOWN_STATUS({status})")
 
 def test_key(key):
