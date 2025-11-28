@@ -1,3 +1,123 @@
+Yes — you **can** frame this finding as an **AppLocker Bypass**, **if and only if** the environment uses AppLocker (or similar controls) to block `cmd.exe` and `powershell.exe` but **fails to block WScript**, resulting in an *execution surface bypass*.
+
+Below is a **clean, industry-standard rewrite** incorporating “AppLocker Bypass” in the correct, non-exploitative, defensible way.
+
+---
+
+# **Title**
+
+**AppLocker Policy Bypass via Windows Script Host (WSH) Execution**
+
+---
+
+# **Description (Generalized)**
+
+An AppLocker Policy Bypass occurs when execution restrictions applied to common command interpreters (e.g., `cmd.exe`, `powershell.exe`) are enforced, but alternative execution mechanisms remain unrestricted. Windows Script Host (WSH), through `wscript.exe` or `cscript.exe`, is capable of executing VBScript, JScript, and related scripts.
+
+If WSH is not explicitly restricted by AppLocker rules, users may indirectly execute system operations through script engines even when direct command-line access is blocked. This results in a bypass of the intended command-execution restrictions.
+
+---
+
+# **Observation (Your Scenario)**
+
+During assessment, it was observed that:
+
+* AppLocker (or similar execution controls) prevents `cmd.exe` and `powershell.exe` from executing.
+* **`wscript.exe` remains allowed** under the current policy.
+* Script files (e.g., `.vbs`, `.js`) can be executed without restriction.
+* WSH provides accessible APIs that enable system interactions, effectively bypassing intended command restrictions.
+
+This indicates that the AppLocker configuration is **incomplete**, restricting shells but not restricting alternative script hosts such as Windows Script Host.
+
+---
+
+# **Impact**
+
+If exploited, this misconfiguration may allow attackers to:
+
+* Bypass AppLocker restrictions designed to prevent command execution
+* Execute arbitrary scripts through `wscript.exe` or `cscript.exe`
+* Perform file, registry, and network operations through WSH APIs
+* Reintroduce system-level command capabilities despite blocked shells
+* Maintain persistence or escalate impact depending on permissions
+
+This weakens the overall security posture and undermines command-execution controls.
+
+---
+
+# **Remediation**
+
+### **1. Enforce AppLocker or WDAC Rules for Script Hosts**
+
+Explicitly block or restrict:
+
+* `wscript.exe`
+* `cscript.exe`
+* Any unsigned `.vbs`, `.js`, `.wsf`, `.wsh` script files
+
+### **2. Disable Windows Script Host (if not required)**
+
+Use Group Policy:
+`Computer Configuration → Administrative Templates → Windows Components → Windows Script Host → Prevent Access to Windows Script Host`
+
+### **3. Require Script Signing**
+
+Allow only trusted, signed scripts to execute.
+
+### **4. Harden User Write Locations**
+
+Prevent users from writing script files in execution-permitted directories.
+
+### **5. Monitor WSH Activity**
+
+Enable logging for script execution and AppLocker/WDAC enforcement events.
+
+---
+
+# **References**
+
+### **Microsoft Documentation**
+
+* Windows Script Host Overview
+  [https://learn.microsoft.com/en-us/windows/win32/wsh/windows-script-host](https://learn.microsoft.com/en-us/windows/win32/wsh/windows-script-host)
+* Disable Windows Script Host (GPO)
+  [https://learn.microsoft.com/en-us/troubleshoot/windows-client/admin-development/windows-script-host-disable](https://learn.microsoft.com/en-us/troubleshoot/windows-client/admin-development/windows-script-host-disable)
+* AppLocker Script Rules Enforcement
+  [https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/script-rules](https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/script-rules)
+* Windows Defender Application Control (WDAC)
+  [https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/](https://learn.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/)
+
+### **MITRE ATT&CK**
+
+* T1059.005 — Visual Basic
+  [https://attack.mitre.org/techniques/T1059/005/](https://attack.mitre.org/techniques/T1059/005/)
+* T1059.007 — JavaScript/JScript
+  [https://attack.mitre.org/techniques/T1059/007/](https://attack.mitre.org/techniques/T1059/007/)
+
+---
+
+If you want, I can format this as:
+
+✔ a **pentest report table**
+✔ **CVSS scoring**
+✔ an **executive summary**
+✔ **OWASP-style** finding format
+
+Just tell me the format you prefer.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Certainly! Below is a more concise and tailored version of the information specifically formatted for a **penetration testing report**.
 
 ---
